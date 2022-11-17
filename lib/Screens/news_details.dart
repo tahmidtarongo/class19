@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:maan_academy_news/Model/News_details_model.dart';
+import 'package:maan_academy_news/Repository/news_repo.dart';
 
 import '../Widget/news_card_widgets.dart';
 import 'home_screen.dart';
 
 class NewsDetails extends StatefulWidget {
-  const NewsDetails({Key? key,required this.imageUrl, required this.titleText}) : super(key: key);
+  const NewsDetails({Key? key,required this.newsId}) : super(key: key);
 
-  final String imageUrl;
-  final String titleText;
+  final String newsId;
 
 
   @override
@@ -22,16 +24,47 @@ class _NewsDetailsState extends State<NewsDetails> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        body: Column(
-          children: [
-            FeaturedNewsCard(
-                images: widget.imageUrl,
-                titles: widget.titleText),
-            Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Text(description,style: TextStyle(color: Colors.black,fontSize: 16.0),),
-            )
-          ],
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0.0,
+        ),
+        body: FutureBuilder<NewsDetailsModel>(
+          future: NewsRepo().getNewsDetails(widget.newsId),
+          builder: (_,snapshot){
+            if(snapshot.hasData){
+              return SingleChildScrollView(
+                child: Column(
+                  children: [
+
+                    FeaturedNewsCard(
+                        images: snapshot.data?.data?.image?[0].toString() ?? '',
+                        titles: snapshot.data?.data?.title ?? ''),
+                    Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(10.0),
+                            decoration: BoxDecoration(color: Colors.red),
+                            child: Text(snapshot.data?.data?.newsCategory ?? '',style: TextStyle(color: Colors.white),),
+                          ),
+                          Spacer(),
+                          Text(snapshot.data?.data?.reporterName ?? '',style: TextStyle(color: Colors.black),)
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Text(Bidi.stripHtmlIfNeeded(snapshot.data?.data?.description ?? ''),style: TextStyle(color: Colors.black,fontSize: 16.0),),
+                    )
+                  ],
+                ),
+              );
+            } else{
+              return const Center(child: CircularProgressIndicator(),);
+            }
+          },
         ),
       ),
     );

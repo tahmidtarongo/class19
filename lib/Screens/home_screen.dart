@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:maan_academy_news/Model/News_model.dart';
 import 'package:maan_academy_news/Screens/news_details.dart';
 import 'package:nb_utils/nb_utils.dart';
 
+import '../Repository/news_repo.dart';
 import '../Widget/news_card_widgets.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -13,18 +15,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
 
-  List<String> titles = [
-    'Taina Blue Retreat is a Converted Tower on the Greek Coast',
-    'Entertainment partners chill at home with a few must-see movies or head out for',
-    'Official press statement an historic moment time and a new journey to begin'
-  ];
-
-  List<String> images = [
-    'http://maannews.maantechnology.com/public/uploads/images/newsimages/maannewsimage30012022_034246_politics_2.jpg',
-    'http://maannews.maantechnology.com/public/uploads/images/newsimages/maannewsimage30012022_034317_politics_3.jpg',
-    'http://maannews.maantechnology.com/public/uploads/images/newsimages/maannewsimage23102021_072605_amazon.jpg'
-  ];
-
 
   @override
   Widget build(BuildContext context) {
@@ -32,16 +22,25 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text('Maan News'),
       ),
-      body: ListView.builder(
-        itemCount: 50,
-          itemBuilder: (_,index){
-        return Column(
-          children: [
-            FeaturedNewsCard(images: images[index % 3], titles: titles[index % 3]).visible(index == 0),
-            NewsCard(titles: titles[index % 3], images: images[index % 3]).visible(index !=0),
-          ],
-        ).onTap(() => NewsDetails(imageUrl: images[index % 3], titleText: titles[index % 3],).launch(context));
-      }),
+      body: FutureBuilder<NewsModel>(
+        future: NewsRepo().getNews(),
+        builder: (_,snapshot){
+          if(snapshot.hasData){
+            return ListView.builder(
+                itemCount: snapshot.data?.datas?.data?.length ?? 0,
+                itemBuilder: (_,index){
+                  return Column(
+                    children: [
+                      FeaturedNewsCard(images: snapshot.data?.datas?.data?[index].image?[0] ?? '', titles: snapshot.data?.datas?.data?[index].title ?? '').visible(index == 0),
+                      NewsCard(titles: snapshot.data?.datas?.data?[index].title ?? '', images: snapshot.data?.datas?.data?[index].image?[0] ?? '').visible(index !=0),
+                    ],
+                  ).onTap(() => NewsDetails(newsId: snapshot.data!.datas!.data![index].id.toString(),).launch(context));
+                });
+          } else{
+            return const Center(child: CircularProgressIndicator(),);
+          }
+        },
+      ),
     );
   }
 }

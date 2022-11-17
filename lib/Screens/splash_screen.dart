@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:maan_academy_news/Screens%20With%20Provider/home_screen_provider.dart';
 import 'package:maan_academy_news/Screens/home_screen.dart';
 import 'package:nb_utils/nb_utils.dart';
 class SplashScreen extends StatefulWidget {
@@ -11,7 +12,7 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   
   Future<void> initSplash () async{
-    await Future.delayed(const Duration(seconds: 2)).then((value) => const HomeScreen().launch(context,isNewTask: true));
+    await Future.delayed(const Duration(seconds: 2)).then((value) => const HomeScreenWithProvider().launch(context,isNewTask: true));
   }
   @override
   void initState() {
